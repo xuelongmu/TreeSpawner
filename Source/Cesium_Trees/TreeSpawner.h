@@ -19,12 +19,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	int32 TreesToSpawn = 10000;
 
+	/** Adds the tree instances to the HISM */
 	UFUNCTION(BlueprintCallable)
 	void SpawnTrees();
 
+	/** Adds a single tree instance to the HISM */
 	UFUNCTION(BlueprintCallable)
 	void AddTree(FVector TreeLocation);
 
+	/** Retrieves the tree info from the instance at a specified index in the HISM */
 	bool GetTreeInfo(SIZE_T Index, OUT float& Height, OUT float& CanopyRadius) const;
 
 protected:
@@ -33,8 +36,7 @@ protected:
 
 
 	/** Using a Hierarchical Instanced Static Mesh Component batches objects on the draw thread,
-	* dramatically reducing the number of draw calls required.
-	*/
+	* dramatically reducing the number of draw calls required. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	class UHierarchicalInstancedStaticMeshComponent* TreeHISM;
 

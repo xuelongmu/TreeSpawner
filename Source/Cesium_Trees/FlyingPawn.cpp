@@ -56,6 +56,8 @@ void AFlyingPawn::GetItemInfo()
 			bool Success = HitSpawner->GetTreeInfo(HitResult.Item, Height, CanopyRadius);
 			if (Success)
 			{
+				// If component doesn't exist, create it and attach it to the TreeSpawner. If it does, simply move it
+				// and update its info.
 				if (!TreeInfoComponent.IsValid())
 				{
 					TreeInfoComponent = NewObject<UTreeInfoWidgetComponent>(
