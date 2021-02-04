@@ -14,7 +14,7 @@ This is a small application for spawning large numbers of trees at randomly gene
 
 **Middle click** or **F** to place new trees.
 
-By default, the spawner will load 10,000 trees on begin play. This value can be tweaked to any value in `BP_TreeSpawner`. The screenshot below demonstrates 200,000 trees with FPS ranging from 30-100.
+By default, the spawner will load 10,000 trees on begin play. This value can be tweaked to any value in `BP_TreeSpawner`. The screenshot below demonstrates 200,000 trees with FPS ranging from 30-100 on an RTX 2080 and Ryzen 3600.
 
 ![screenshot](Screenshot.png)
 
