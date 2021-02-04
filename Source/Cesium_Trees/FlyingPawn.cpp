@@ -95,7 +95,7 @@ bool AFlyingPawn::PerformLineTrace(OUT FHitResult& OutHit, ECollisionChannel Tra
 		OutHit,
 		Start,
 		End,
-		ECC_WorldStatic,
+		TraceChannel,
 		TraceParams
 	);
 }
