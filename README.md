@@ -1,6 +1,6 @@
 # Tree Spawner Project
 
-This is a application that demonstrates spawning large numbers of trees at randomly generated locations and dimensions.
+This is a small application for spawning large numbers of trees at randomly generated locations and dimensions.
 
 [Demo video can be viewed here.](https://youtu.be/_Iyv76pFPLo)
 
