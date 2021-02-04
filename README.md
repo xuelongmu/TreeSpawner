@@ -4,7 +4,7 @@ This is a small application for spawning large numbers of trees at randomly gene
 
 [Demo video can be viewed here.](https://youtu.be/_Iyv76pFPLo)
 
-### Instructions
+## Instructions
 
 **WASD** to move around, **Q** and **E** to change elevation.
 
@@ -24,6 +24,6 @@ I used a Hierarchial Static Mesh Component (HISM) to store the tree instances.
 
 As the number of trees grew large (100,000+) I made some tweaks to improve performance. I disabled shadows, lowered the LOD of the tree's static mesh, and enabled distance culling (as can be seen in the video).
 
-Adding a new tree with a very large number of trees (e.g. 200,000) in the level caused a lag spike. I believe this is due to the effect of adding another leaf to the HISM "cluster tree" structure.
+Adding a new tree with a very large number of trees in the level (e.g. 200,000) caused a lag spike. I believe this was due to adding another leaf to the HISM "cluster tree" structure.
 
-The project hanged when compiling with the 100,000 header file included, so I rewrote the generator in `TreeGenerator.cpp`
+The project hanged when building with the 100,000 tree header file included, so I rewrote the generator in `TreeGenerator.cpp`
