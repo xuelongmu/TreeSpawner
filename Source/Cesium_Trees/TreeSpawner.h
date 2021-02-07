@@ -32,7 +32,7 @@ protected:
 
 	/** Using a Hierarchical Instanced Static Mesh Component batches objects on the draw thread,
 	* dramatically reducing the number of draw calls required. */
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	class UHierarchicalInstancedStaticMeshComponent* TreeHISM;
 
 private:
