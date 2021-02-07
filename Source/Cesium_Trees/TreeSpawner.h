@@ -19,10 +19,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	int32 TreesToSpawn = 10000;
 
-	/** Adds the tree instances to the HISM */
-	UFUNCTION(BlueprintCallable)
-	void SpawnTrees();
-
 	/** Adds a single tree instance to the HISM */
 	UFUNCTION(BlueprintCallable)
 	void AddTree(FVector TreeLocation);
@@ -34,15 +30,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
 	/** Using a Hierarchical Instanced Static Mesh Component batches objects on the draw thread,
 	* dramatically reducing the number of draw calls required. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY()
 	class UHierarchicalInstancedStaticMeshComponent* TreeHISM;
 
 private:
-	float TreeStaticMeshHeight;
-	float TreeStaticMeshRadius;
-
 	class TreeGenerator* MyTreeGenerator;
+
+	TArray<FTransform> TreeTransforms;
+
+	/** Calculates transforms based on random generator output */
+	void CalculateTreeTransforms();
+
+	/** Add all randomly generated tree transforms to HISM. Must run on game thread. */
+	void AddTreesInternal();
 };

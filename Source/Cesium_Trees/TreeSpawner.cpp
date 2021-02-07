@@ -5,6 +5,7 @@
 // #include "trees-100000.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "TreeGenerator.h"
+#include "Async/Async.h"
 
 
 // Sets default values
@@ -18,11 +19,13 @@ void ATreeSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	MyTreeGenerator = new TreeGenerator;
-	MyTreeGenerator->GenerateTrees(TreesToSpawn);
-	SpawnTrees();
+	Async<>(EAsyncExecution::ThreadPool, [&]
+	{
+		MyTreeGenerator->GenerateTrees(TreesToSpawn);
+	}, [&] { CalculateTreeTransforms(); }); //CalculateTreeTransforms will run on the same async thread.
 }
 
-void ATreeSpawner::SpawnTrees()
+void ATreeSpawner::CalculateTreeTransforms()
 {
 	if (!TreeHISM->GetStaticMesh())
 	{
@@ -32,10 +35,11 @@ void ATreeSpawner::SpawnTrees()
 	FVector StaticMeshSize = TreeHISM->GetStaticMesh()->GetBoundingBox().GetExtent();
 	UE_LOG(LogTemp, Warning, TEXT("Static mesh size: %s"), *StaticMeshSize.ToString());
 	// As a rough estimate of the tree's radius, take the bounding box size, get the average of its X and Y axes, and divide by 2.
-	TreeStaticMeshRadius = (StaticMeshSize.Y + StaticMeshSize.X) / 4;
-	TreeStaticMeshHeight = StaticMeshSize.Z;
+	float TreeStaticMeshRadius = (StaticMeshSize.Y + StaticMeshSize.X) / 4;
+	float TreeStaticMeshHeight = StaticMeshSize.Z;
 
 	std::vector<Tree>& Trees = MyTreeGenerator->trees;
+	TreeTransforms.Reserve(Trees.size());
 	for (SIZE_T i = 0; i < Trees.size(); i++)
 	{
 		Tree* Tree = &Trees[i];
@@ -47,9 +51,20 @@ void ATreeSpawner::SpawnTrees()
 		                            Tree->height / TreeStaticMeshHeight);
 
 		FTransform TreeTransform = FTransform(FRotator::ZeroRotator, TreeLocation, TreeScale);
-
-		TreeHISM->AddInstanceWorldSpace(TreeTransform);
+		TreeTransforms.Push(TreeTransform);
 	}
+
+	// Updating the HISM needs to run on the game thread due to internal IsOnGameThread() checks.
+	AsyncTask(ENamedThreads::GameThread, [&]
+	{
+		AddTreesInternal();
+	});
+}
+
+void ATreeSpawner::AddTreesInternal()
+{
+	TreeHISM->PreAllocateInstancesMemory(TreeTransforms.Num());
+	TreeHISM->AddInstances(TreeTransforms, false);
 }
 
 void ATreeSpawner::AddTree(FVector TreeLocation)

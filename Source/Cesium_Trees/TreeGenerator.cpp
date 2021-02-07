@@ -4,7 +4,7 @@ TreeGenerator::TreeGenerator()
 {
 }
 
-std::vector<Tree>& TreeGenerator::GenerateTrees(size_t Count)
+void TreeGenerator::GenerateTrees(size_t Count)
 {
 	trees.reserve(Count);
 	std::default_random_engine generator;
@@ -24,5 +24,5 @@ std::vector<Tree>& TreeGenerator::GenerateTrees(size_t Count)
 		};
 		trees.push_back(tree);
 	}
-	return trees;
+	return;
 }
