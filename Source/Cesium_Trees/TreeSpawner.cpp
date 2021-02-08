@@ -17,16 +17,9 @@ ATreeSpawner::ATreeSpawner()
 void ATreeSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	// auto AddTrees = GET_FUNCTION_NAME_CHECKED(ATreeSpawner, AddTreesInternal);
-	// this->OnTreeGenerationCompleted.BindUFunction(this, AddTrees, true);
-	// this->OnTreeGenerationCompleted.BindUObject(this, &ATreeSpawner::AddTreesInternal);
+
 	FSimpleDelegate OnGenerationCompleted = FSimpleDelegate::CreateUObject(this, &ATreeSpawner::AddTreesInternal);
-	//
-	// Lambda
-	// FSimpleDelegate OnGenerationCompleted = FSimpleDelegate::CreateLambda([this]
-	// {
-	// 	this->AddTreesInternal();
-	// });
+
 	MyTreeGenerator = new TreeGenerator;
 	Async<>(EAsyncExecution::ThreadPool, [=]
 	{
