@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "TreeSpawner.generated.h"
 
+DECLARE_DELEGATE(FOnTreeGenerationCompletedEvent)
 
 UCLASS()
 class CESIUM_TREES_API ATreeSpawner : public AActor
@@ -41,8 +42,11 @@ private:
 	TArray<FTransform> TreeTransforms;
 
 	/** Calculates transforms based on random generator output */
-	void CalculateTreeTransforms();
+	void GenerateTreeTransforms(const FSimpleDelegate& InOnGenerationCompleted);
 
 	/** Add all randomly generated tree transforms to HISM. Must run on game thread. */
+	UFUNCTION()
 	void AddTreesInternal();
+
+	FOnTreeGenerationCompletedEvent OnTreeGenerationCompleted;
 };

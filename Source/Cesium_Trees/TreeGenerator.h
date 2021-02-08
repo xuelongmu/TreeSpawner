@@ -19,7 +19,7 @@ class TreeGenerator
 public:
 	TreeGenerator();
 
-	void GenerateTrees(size_t Size);
+	std::vector<Tree>& GenerateTrees(size_t Size);
 
 	std::vector<Tree> trees;
 };

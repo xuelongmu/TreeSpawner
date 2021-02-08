@@ -2,7 +2,6 @@
 
 
 #include "TreeSpawner.h"
-// #include "trees-100000.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "TreeGenerator.h"
 #include "Async/Async.h"
@@ -18,14 +17,24 @@ ATreeSpawner::ATreeSpawner()
 void ATreeSpawner::BeginPlay()
 {
 	Super::BeginPlay();
+	// auto AddTrees = GET_FUNCTION_NAME_CHECKED(ATreeSpawner, AddTreesInternal);
+	// this->OnTreeGenerationCompleted.BindUFunction(this, AddTrees, true);
+	// this->OnTreeGenerationCompleted.BindUObject(this, &ATreeSpawner::AddTreesInternal);
+	FSimpleDelegate OnGenerationCompleted = FSimpleDelegate::CreateUObject(this, &ATreeSpawner::AddTreesInternal);
+	//
+	// Lambda
+	// FSimpleDelegate OnGenerationCompleted = FSimpleDelegate::CreateLambda([this]
+	// {
+	// 	this->AddTreesInternal();
+	// });
 	MyTreeGenerator = new TreeGenerator;
-	Async<>(EAsyncExecution::ThreadPool, [&]
+	Async<>(EAsyncExecution::ThreadPool, [=]
 	{
-		MyTreeGenerator->GenerateTrees(TreesToSpawn);
-	}, [&] { CalculateTreeTransforms(); }); //CalculateTreeTransforms will run on the same async thread.
+		GenerateTreeTransforms(OnGenerationCompleted);
+	});
 }
 
-void ATreeSpawner::CalculateTreeTransforms()
+void ATreeSpawner::GenerateTreeTransforms(const FSimpleDelegate& InOnGenerationCompleted)
 {
 	if (!TreeHISM->GetStaticMesh())
 	{
@@ -38,7 +47,7 @@ void ATreeSpawner::CalculateTreeTransforms()
 	float TreeStaticMeshRadius = (StaticMeshSize.Y + StaticMeshSize.X) / 4;
 	float TreeStaticMeshHeight = StaticMeshSize.Z;
 
-	std::vector<Tree>& Trees = MyTreeGenerator->trees;
+	std::vector<Tree>& Trees = MyTreeGenerator->GenerateTrees(TreesToSpawn);
 	TreeTransforms.Reserve(Trees.size());
 	for (SIZE_T i = 0; i < Trees.size(); i++)
 	{
@@ -54,17 +63,24 @@ void ATreeSpawner::CalculateTreeTransforms()
 		TreeTransforms.Push(TreeTransform);
 	}
 
-	// Updating the HISM needs to run on the game thread due to internal IsOnGameThread() checks.
-	AsyncTask(ENamedThreads::GameThread, [&]
+
+	/** Updating the HISM needs to run on the game thread due to internal IsOnGameThread() checks.
+	 * Delegates cannot normally be used to communicate between threads; they will invoke callbacks on the same
+	 * thread they're called from. So I create a tiny task on the task graph to execute the delegate. */
+	AsyncTask(ENamedThreads::GameThread, [=]
 	{
-		AddTreesInternal();
+		InOnGenerationCompleted.ExecuteIfBound();
 	});
 }
 
 void ATreeSpawner::AddTreesInternal()
 {
-	TreeHISM->PreAllocateInstancesMemory(TreeTransforms.Num());
-	TreeHISM->AddInstances(TreeTransforms, false);
+	UE_LOG(LogTemp, Warning, TEXT("In game thread: %s"), IsInGameThread()?TEXT("True") : TEXT("False"));
+	if (IsInGameThread())
+	{
+		TreeHISM->PreAllocateInstancesMemory(TreeTransforms.Num());
+		TreeHISM->AddInstances(TreeTransforms, false);
+	}
 }
 
 void ATreeSpawner::AddTree(FVector TreeLocation)
